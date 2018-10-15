@@ -18,7 +18,7 @@ class dummies():
     def __init__(self):
         self.columns_dict = {}
 
-    def fit(self, df: pd.DataFrame, cols: list, nan_dummies=True):
+    def fit(self, df: pd.DataFrame, cols: list, nan_dummies=True, prefix=None, prefix_sep="-"):
         """
         fits the dummies object to the training data
 
@@ -28,11 +28,25 @@ class dummies():
 
         optional arguments:
         nan_dummies -- Include a column for nan values, defualt True
+        prefix -- "cols": prepends the original DataFrame column name to the dummy column names
+                  None: Does not include a prefix
+                  deafult: None
+        prefix_sep -- string: what is used to seperate the prefix and the dummy name.
+                      default: "-"
         """
         for col in cols:
-            self.columns_dict[col] = list(set(df[col].unique()) - set([np.nan]))
+            dummy_cols = list(set(df[col].unique()) - set([np.nan]))
+            if prefix == "cols":
+                named_dummies = []
+                for dummy in dummy_cols:
+                    named_dummies.append(f"{col}{prefix_sep}{dummy}")
+                self.columns_dict[col] = named_dummies
+            else:
+                self.columns_dict = dummy_cols
+            
             if nan_dummies == True:
-                self.columns_dict[col].append('nan_' + col)
+                self.columns_dict[col].append(f"{col}{prefix_sep}nan")
+
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         """
